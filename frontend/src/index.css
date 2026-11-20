@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  /* 60% — Onyx Black */
+  --color-onyx: #0b0b0d;
+  --color-onyx-surface: #141418;
+  /* 30% — Pure White */
+  --color-pure-white: #ffffff;
+  --color-off-white: #f4f4f6;
+  /* 10% — Spark Lime */
+  --color-spark-lime: #a3e635;
+  --color-spark-lime-hover: #bef264;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-onyx text-pure-white font-sans antialiased min-h-dvh;
+  }
+
+  ::selection {
+    @apply bg-spark-lime text-onyx;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-spark-lime;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-spark-lime px-5 py-2.5 font-semibold text-onyx transition-colors hover:bg-spark-lime-hover disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-5 py-2.5 font-medium text-pure-white transition-colors hover:border-spark-lime hover:text-spark-lime;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-white/10 bg-onyx-surface px-3 py-2 text-pure-white placeholder:text-white/40 focus:border-spark-lime focus:outline-none;
+  }
+}
+
+/* Hide native cursor only when the custom cursor is active (fine pointer + motion allowed). */
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
