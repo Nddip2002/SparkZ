@@ -28,18 +28,23 @@ export function AuthModal({ configured, onClose }: AuthModalProps) {
       }
       onClose();
     } catch (err) {
-      setError((err as Error).message || 'Authentication failed');
+      setError((err as Error).message || 'Authentication failed. Check your email and password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs">
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-onyx-surface p-6 shadow-2xl">
-        <div className="flex items-center justify-between pb-4">
-          <h2 className="text-xl font-bold text-pure-white">
-            {isSignUp ? 'Create SparkZ Account' : 'Welcome back to SparkZ'}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-dialog-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B111E]/80 p-4 backdrop-blur-sm"
+    >
+      <div className="w-full max-w-md rounded-2xl border border-[#28364F] bg-[#131C2E] p-6 space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-[#28364F] bg-[#1A253A] p-3">
+          <h2 id="auth-dialog-title" className="title-1 text-pure-white">
+            {isSignUp ? 'Create SparkZ account' : 'Sign in to SparkZ'}
           </h2>
           <button
             type="button"
@@ -52,88 +57,98 @@ export function AuthModal({ configured, onClose }: AuthModalProps) {
         </div>
 
         {!configured && (
-          <div className="mb-4 rounded-lg border border-spark-lime/30 bg-spark-lime/10 p-3 text-xs text-pure-white/90">
-            <p className="font-semibold text-spark-lime">Demo / Local Environment Note</p>
+          <div className="rounded-lg border border-spark-lime/40 bg-[#0F2537] p-3 caption-2 text-pure-white/90">
+            <p className="caption-3 text-spark-lime">Local environment note</p>
             <p className="mt-1">
-              Supabase keys are not yet configured in <code className="text-spark-lime">frontend/.env</code>.
-              Configure <code className="text-spark-lime">VITE_SUPABASE_URL</code> and <code className="text-spark-lime">VITE_SUPABASE_ANON_KEY</code> to enable live authentication.
+              Configure <code className="font-mono text-spark-lime">VITE_SUPABASE_URL</code> and{' '}
+              <code className="font-mono text-spark-lime">VITE_SUPABASE_ANON_KEY</code> in{' '}
+              <code className="font-mono text-spark-lime">frontend/.env</code> to enable live authentication.
             </p>
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400">
+          <div
+            role="alert"
+            className="rounded-lg border border-red-500/40 bg-[#1A253A] p-3 caption-2 text-red-400"
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                Full Name
+            <div className="space-y-1">
+              <label htmlFor="auth-fullname" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                Full name
               </label>
               <input
+                id="auth-fullname"
                 type="text"
                 required
+                autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ada Lovelace"
-                className="input mt-1"
+                className="input"
               />
             </div>
           )}
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-              Email
+          <div className="space-y-1">
+            <label htmlFor="auth-email" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+              Email address
             </label>
             <input
+              id="auth-email"
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="engineer@sparkz.dev"
-              className="input mt-1"
+              className="input"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
+          <div className="space-y-1">
+            <label htmlFor="auth-password" className="block caption-3 uppercase tracking-wider text-pure-white/60">
               Password
             </label>
             <input
+              id="auth-password"
               type="password"
               required
               minLength={6}
+              autoComplete={isSignUp ? 'new-password' : 'current-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="input mt-1"
+              placeholder="Minimum 6 characters"
+              className="input"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading || !configured}
-            className="btn-primary w-full py-2.5 text-sm font-bold"
+            className="btn-primary w-full"
           >
-            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
+            {loading ? 'Verifying credentials...' : isSignUp ? 'Create account' : 'Sign in'}
           </button>
         </form>
 
-        <div className="mt-4 text-center">
+        <div className="pt-2 text-center">
           <button
             type="button"
             onClick={() => {
               setIsSignUp(!isSignUp);
               setError(null);
             }}
-            className="text-xs text-pure-white/60 hover:text-spark-lime"
+            className="caption-2 text-pure-white/60 hover:text-spark-lime"
           >
             {isSignUp
               ? 'Already have an account? Sign in'
-              : "Don't have an account? Create one"}
+              : 'Need an account? Create one'}
           </button>
         </div>
       </div>

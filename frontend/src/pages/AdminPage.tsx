@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useAdminProducts,
   useAdminOrders,
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const { data: me, isLoading: meLoading } = useMe();
   const [tab, setTab] = useState<'products' | 'orders'>('products');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [confirmDeactivateId, setConfirmDeactivateId] = useState<string | null>(null);
   const [newProd, setNewProd] = useState<ProductInput>(initialProductInput);
 
   const { data: products, isLoading: productsLoading } = useAdminProducts();
@@ -43,16 +45,26 @@ export default function AdminPage() {
   const deleteProduct = useDeleteProduct();
 
   if (meLoading) {
-    return <div className="py-16 text-center text-pure-white/60">Verifying administrator privileges...</div>;
+    return (
+      <div className="mx-auto max-w-5xl py-16 space-y-4">
+        <div className="h-8 w-56 animate-pulse rounded-lg bg-[#131C2E]" />
+        <div className="h-64 animate-pulse rounded-2xl border border-[#28364F] bg-[#131C2E]" />
+      </div>
+    );
   }
 
   if (me?.role !== 'ADMIN') {
     return (
-      <div className="mx-auto max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-red-400">Access Restricted</h1>
-        <p className="mt-2 text-xs text-pure-white/60">
+      <div className="mx-auto max-w-[680px] py-16 text-center space-y-4">
+        <h1 className="heading-3 text-red-400">Access restricted</h1>
+        <p className="body-6 text-pure-white/60">
           Administrator privileges are required to view and modify inventory and orders.
         </p>
+        <div className="pt-2">
+          <Link to="/" className="btn-ghost">
+            Back to overview
+          </Link>
+        </div>
       </div>
     );
   }
@@ -65,16 +77,19 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="space-y-8 pb-16">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-pure-white">Admin Dashboard</h1>
-            <span className="rounded-md bg-spark-lime px-2 py-0.5 font-mono text-xs font-bold text-onyx">
+    <div className="space-y-8 pb-20 pt-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <Link to="/" className="caption-4 text-spark-lime hover:underline">
+            ← Back to overview
+          </Link>
+          <div className="flex items-center gap-3">
+            <h1 className="heading-3 text-pure-white">Admin dashboard</h1>
+            <span className="rounded-md bg-spark-lime px-2 py-0.5 font-mono caption-3 text-[#0B111E]">
               ADMIN
             </span>
           </div>
-          <p className="mt-1 text-xs text-pure-white/60">
+          <p className="caption-2 text-pure-white/60">
             Live catalog management, inventory levels, and order fulfillment.
           </p>
         </div>
@@ -83,112 +98,132 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="btn-primary py-2 text-xs font-bold"
+            className="btn-primary"
           >
-            + Create New Component
+            + Create new component
           </button>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-white/10">
+      <div className="flex gap-3">
         <button
           type="button"
           onClick={() => setTab('products')}
-          className={`pb-3 text-sm font-semibold transition-colors ${
-            tab === 'products'
-              ? 'border-b-2 border-spark-lime text-spark-lime'
-              : 'text-pure-white/60 hover:text-pure-white'
-          }`}
+          className={tab === 'products' ? 'btn-sm-primary' : 'btn-ghost'}
         >
-          Products & Inventory ({products?.length ?? 0})
+          Products and inventory ({products?.length ?? 0})
         </button>
         <button
           type="button"
           onClick={() => setTab('orders')}
-          className={`pb-3 text-sm font-semibold transition-colors ${
-            tab === 'orders'
-              ? 'border-b-2 border-spark-lime text-spark-lime'
-              : 'text-pure-white/60 hover:text-pure-white'
-          }`}
+          className={tab === 'orders' ? 'btn-sm-primary' : 'btn-ghost'}
         >
-          Customer Orders ({orders?.length ?? 0})
+          Customer orders ({orders?.length ?? 0})
         </button>
       </div>
 
       {/* Products Tab */}
       {tab === 'products' && (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-onyx-surface">
+        <div className="overflow-hidden rounded-2xl border border-[#28364F] bg-[#131C2E]">
           {productsLoading ? (
-            <div className="p-8 text-center text-xs text-pure-white/60">Loading products...</div>
+            <div className="p-8 space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-[#1A253A]" />
+              ))}
+            </div>
           ) : (
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-white/10 bg-onyx font-mono text-pure-white/50 uppercase">
-                <tr>
-                  <th className="py-3 px-4">Component</th>
-                  <th className="py-3 px-4">SKU / MPN</th>
-                  <th className="py-3 px-4">Price</th>
-                  <th className="py-3 px-4">Stock</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {products?.map((prod) => (
-                  <tr key={prod.id} className="hover:bg-white/[0.02]">
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-pure-white">{prod.name}</div>
-                      <div className="text-[11px] text-pure-white/50">{prod.manufacturer} • {prod.category}</div>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-pure-white/70">
-                      <div>{prod.sku}</div>
-                      <div className="text-[10px] text-pure-white/40">{prod.mpn}</div>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-pure-white font-bold">
-                      {formatPrice(prod.unitPrice)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-[#1A253A] font-mono caption-3 uppercase text-pure-white/60">
+                  <tr>
+                    <th scope="col" className="py-3 px-4">Component</th>
+                    <th scope="col" className="py-3 px-4">SKU / MPN</th>
+                    <th scope="col" className="py-3 px-4">Price</th>
+                    <th scope="col" className="py-3 px-4">Stock</th>
+                    <th scope="col" className="py-3 px-4">Status</th>
+                    <th scope="col" className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="body-6">
+                  {products?.map((prod) => (
+                    <tr key={prod.id} className="even:bg-[#1A253A]/50">
+                      <td className="py-3 px-4">
+                        <div className="title-4 text-pure-white">{prod.name}</div>
+                        <div className="caption-5 text-pure-white/50">{prod.manufacturer} · {prod.category}</div>
+                      </td>
+                      <td className="py-3 px-4 font-mono caption-2 text-pure-white/80">
+                        <div>{prod.sku}</div>
+                        <div className="caption-5 text-pure-white/40">{prod.mpn}</div>
+                      </td>
+                      <td className="py-3 px-4 font-mono body-4 text-pure-white">
+                        {formatPrice(prod.unitPrice)}
+                      </td>
+                      <td className="py-3 px-4">
+                        <label htmlFor={`stock-${prod.id}`} className="skip-link">
+                          Stock quantity for {prod.name}
+                        </label>
                         <input
+                          id={`stock-${prod.id}`}
                           type="number"
                           min={0}
                           defaultValue={prod.stockQuantity}
                           onBlur={(e) => {
                             const val = Number(e.target.value);
-                            if (val !== prod.stockQuantity && !isNaN(val)) {
+                            if (val !== prod.stockQuantity && !Number.isNaN(val)) {
                               updateInventory.mutate({ id: prod.id, stockQuantity: val });
                             }
                           }}
-                          className="w-20 rounded border border-white/10 bg-onyx px-2 py-1 font-mono text-xs text-pure-white"
+                          className="w-20 rounded-lg border border-[#28364F] bg-[#0B111E] px-2 py-1 font-mono caption-2 text-pure-white"
                         />
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          prod.isActive ? 'bg-spark-lime/20 text-spark-lime' : 'bg-red-500/20 text-red-400'
-                        }`}
-                      >
-                        {prod.isActive ? 'Active' : 'Archived'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Archive ${prod.name}?`)) {
-                            deleteProduct.mutate(prod.id);
-                          }
-                        }}
-                        className="text-xs text-red-400 hover:text-red-300"
-                      >
-                        Deactivate
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-block rounded-md border px-2 py-0.5 font-mono caption-4 ${
+                            prod.isActive
+                              ? 'border-spark-lime/40 bg-[#0F2537] text-spark-lime'
+                              : 'border-red-500/40 bg-[#131C2E] text-red-400'
+                          }`}
+                        >
+                          {prod.isActive ? 'Active' : 'Archived'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {confirmDeactivateId === prod.id ? (
+                          <div className="inline-flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                deleteProduct.mutate(prod.id);
+                                setConfirmDeactivateId(null);
+                              }}
+                              className="caption-3 text-red-400 hover:underline"
+                            >
+                              Confirm archive
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeactivateId(null)}
+                              className="caption-4 text-pure-white/60 hover:text-pure-white"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeactivateId(prod.id)}
+                            className="caption-3 text-red-400 hover:text-red-300"
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -197,26 +232,34 @@ export default function AdminPage() {
       {tab === 'orders' && (
         <div className="space-y-4">
           {ordersLoading ? (
-            <div className="p-8 text-center text-xs text-pure-white/60">Loading orders...</div>
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-24 animate-pulse rounded-2xl border border-[#28364F] bg-[#131C2E]" />
+              ))}
+            </div>
           ) : (
             orders?.map((ord) => (
               <div
                 key={ord.id}
-                className="rounded-xl border border-white/10 bg-onyx-surface p-4 text-xs space-y-3"
+                className="rounded-2xl border border-[#28364F] bg-[#131C2E] p-4 space-y-3"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#28364F] bg-[#1A253A] p-3">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-pure-white text-sm">
+                    <span className="font-mono body-4 text-pure-white">
                       {ord.orderNumber}
                     </span>
-                    <span className="text-pure-white/50">{formatDate(ord.createdAt)}</span>
+                    <span className="caption-2 text-pure-white/50">{formatDate(ord.createdAt)}</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-spark-lime">
+                    <span className="font-mono body-4 text-spark-lime">
                       {formatPrice(ord.totalAmount)}
                     </span>
+                    <label htmlFor={`status-${ord.id}`} className="skip-link">
+                      Order status for {ord.orderNumber}
+                    </label>
                     <select
+                      id={`status-${ord.id}`}
                       value={ord.status}
                       onChange={(e) =>
                         updateStatus.mutate({
@@ -224,7 +267,7 @@ export default function AdminPage() {
                           status: e.target.value as OrderStatus,
                         })
                       }
-                      className="rounded border border-white/15 bg-onyx px-2 py-1 font-mono text-xs text-pure-white uppercase"
+                      className="rounded-lg border border-[#28364F] bg-[#0B111E] px-2 py-1 font-mono caption-3 text-pure-white uppercase"
                     >
                       <option value="PENDING">PENDING</option>
                       <option value="PROCESSING">PROCESSING</option>
@@ -235,12 +278,12 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="text-[11px] text-pure-white/70">
+                <div className="caption-2 text-pure-white/75">
                   Customer: <strong>{ord.shippingAddress.fullName}</strong> ({ord.shippingAddress.city}, {ord.shippingAddress.state})
                 </div>
 
-                <div className="font-mono text-[11px] text-pure-white/50">
-                  {ord.items.map((i) => `${i.quantity}x ${i.product.name}`).join(' • ')}
+                <div className="font-mono caption-5 text-pure-white/50">
+                  {ord.items.map((i) => `${i.quantity}x ${i.product.name}`).join(' · ')}
                 </div>
               </div>
             ))
@@ -250,12 +293,20 @@ export default function AdminPage() {
 
       {/* Modal: Create Product */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-onyx-surface p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-lg font-bold text-pure-white">Create New Component</h2>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-component-heading"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B111E]/80 p-4 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[#28364F] bg-[#131C2E] p-6 space-y-4">
+            <div className="flex items-center justify-between rounded-lg border border-[#28364F] bg-[#1A253A] p-3">
+              <h2 id="create-component-heading" className="title-1 text-pure-white">
+                Create new component
+              </h2>
               <button
                 type="button"
+                aria-label="Close modal"
                 onClick={() => setShowCreateModal(false)}
                 className="text-pure-white/60 hover:text-pure-white"
               >
@@ -263,139 +314,149 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">SKU *</label>
+            <form onSubmit={handleCreateSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="new-sku" className="block caption-3 uppercase text-pure-white/60">SKU</label>
                   <input
+                    id="new-sku"
                     type="text"
                     required
                     value={newProd.sku}
                     onChange={(e) => setNewProd({ ...newProd, sku: e.target.value })}
-                    className="input mt-1"
+                    className="input"
                     placeholder="SZ-MCU-001"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">MPN *</label>
+                <div className="space-y-1">
+                  <label htmlFor="new-mpn" className="block caption-3 uppercase text-pure-white/60">MPN</label>
                   <input
+                    id="new-mpn"
                     type="text"
                     required
                     value={newProd.mpn}
                     onChange={(e) => setNewProd({ ...newProd, mpn: e.target.value })}
-                    className="input mt-1"
+                    className="input"
                     placeholder="STM32F401RE"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Name *</label>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="new-name" className="block caption-3 uppercase text-pure-white/60">Name</label>
                   <input
+                    id="new-name"
                     type="text"
                     required
                     value={newProd.name}
                     onChange={(e) => setNewProd({ ...newProd, name: e.target.value })}
-                    className="input mt-1"
-                    placeholder="STM32 Nucleo-64 Dev Board"
+                    className="input"
+                    placeholder="STM32 Nucleo 64 Dev Board"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Slug (kebab-case) *</label>
+                <div className="space-y-1">
+                  <label htmlFor="new-slug" className="block caption-3 uppercase text-pure-white/60">URL slug</label>
                   <input
+                    id="new-slug"
                     type="text"
                     required
                     value={newProd.slug}
                     onChange={(e) => setNewProd({ ...newProd, slug: e.target.value.toLowerCase() })}
-                    className="input mt-1"
+                    className="input"
                     placeholder="stm32-nucleo-64"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Category *</label>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="new-cat" className="block caption-3 uppercase text-pure-white/60">Category</label>
                   <input
+                    id="new-cat"
                     type="text"
                     required
                     value={newProd.category}
                     onChange={(e) => setNewProd({ ...newProd, category: e.target.value })}
-                    className="input mt-1"
+                    className="input"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Manufacturer *</label>
+                <div className="space-y-1">
+                  <label htmlFor="new-mfr" className="block caption-3 uppercase text-pure-white/60">Manufacturer</label>
                   <input
+                    id="new-mfr"
                     type="text"
                     required
                     value={newProd.manufacturer}
                     onChange={(e) => setNewProd({ ...newProd, manufacturer: e.target.value })}
-                    className="input mt-1"
+                    className="input"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Unit Price (INR) *</label>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label htmlFor="new-price" className="block caption-3 uppercase text-pure-white/60">Unit price (INR)</label>
                   <input
+                    id="new-price"
                     type="number"
                     step="0.01"
                     required
                     value={newProd.unitPrice}
                     onChange={(e) => setNewProd({ ...newProd, unitPrice: Number(e.target.value) })}
-                    className="input mt-1"
+                    className="input"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold uppercase text-pure-white/60">Stock Quantity *</label>
+                <div className="space-y-1">
+                  <label htmlFor="new-stock" className="block caption-3 uppercase text-pure-white/60">Stock quantity</label>
                   <input
+                    id="new-stock"
                     type="number"
                     required
                     value={newProd.stockQuantity}
                     onChange={(e) => setNewProd({ ...newProd, stockQuantity: Number(e.target.value) })}
-                    className="input mt-1"
+                    className="input"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold uppercase text-pure-white/60">Description</label>
+              <div className="space-y-1">
+                <label htmlFor="new-desc" className="block caption-3 uppercase text-pure-white/60">Description</label>
                 <textarea
+                  id="new-desc"
                   rows={3}
                   value={newProd.description}
                   onChange={(e) => setNewProd({ ...newProd, description: e.target.value })}
-                  className="input mt-1"
+                  className="input"
                 />
               </div>
 
-              <div>
-                <label className="block font-semibold uppercase text-pure-white/60">Datasheet URL</label>
+              <div className="space-y-1">
+                <label htmlFor="new-ds" className="block caption-3 uppercase text-pure-white/60">Datasheet URL</label>
                 <input
+                  id="new-ds"
                   type="url"
                   value={newProd.datasheetUrl}
                   onChange={(e) => setNewProd({ ...newProd, datasheetUrl: e.target.value })}
-                  className="input mt-1"
+                  className="input"
                   placeholder="https://example.com/datasheet.pdf"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="btn-ghost py-2 text-xs"
+                  className="btn-ghost"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createProduct.isPending}
-                  className="btn-primary py-2 text-xs font-bold"
+                  className="btn-primary"
                 >
-                  {createProduct.isPending ? 'Saving...' : 'Save Component'}
+                  {createProduct.isPending ? 'Saving...' : 'Save component'}
                 </button>
               </div>
             </form>

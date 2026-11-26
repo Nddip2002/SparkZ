@@ -1,5 +1,5 @@
 import { useState, useTransition } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useCatalogFilters, useProducts } from '../api/queries';
 import { ProductCard } from '../components/ProductCard';
 import { AuthModal } from '../components/AuthModal';
@@ -52,29 +52,39 @@ export function CatalogPage() {
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-8 pb-20 pt-6">
       {/* Header & Search */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-pure-white">Component Catalog</h1>
-          <p className="mt-1 text-xs text-pure-white/60">
-            {data ? `${data.total} components indexed across all categories` : 'Loading components...'}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <Link to="/" className="caption-4 text-spark-lime hover:underline">
+            ← Back to overview
+          </Link>
+          <h1 className="heading-3 text-pure-white">Component catalog</h1>
+          <p className="caption-2 text-pure-white/60">
+            {data
+              ? `${data.total} verified components indexed across all categories`
+              : 'Loading verified inventory...'}
           </p>
         </div>
 
         <div className="relative w-full sm:w-80">
+          <label htmlFor="catalog-search" className="skip-link">
+            Search SKU, MPN, or component name
+          </label>
           <input
+            id="catalog-search"
             type="search"
             value={search}
             onChange={(e) => updateParam('search', e.target.value)}
             placeholder="Search SKU, MPN, or name..."
-            className="input pr-8 text-sm"
+            className="input pr-8"
           />
           {search && (
             <button
               type="button"
               onClick={() => updateParam('search', null)}
-              className="absolute right-2.5 top-2.5 text-xs text-pure-white/40 hover:text-pure-white"
+              aria-label="Clear search query"
+              className="absolute right-3 top-2.5 caption-3 text-pure-white/50 hover:text-pure-white"
             >
               ✕
             </button>
@@ -85,42 +95,49 @@ export function CatalogPage() {
       {/* Main Catalog Layout */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* Sidebar Filters */}
-        <aside className="space-y-6 rounded-xl border border-white/10 bg-onyx-surface p-5">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-sm font-bold text-pure-white">Filters</h3>
+        <aside
+          aria-label="Catalog filters"
+          className="h-fit space-y-6 rounded-2xl border border-[#28364F] bg-[#131C2E] p-6"
+        >
+          <div className="flex items-center justify-between rounded-lg border border-[#28364F] bg-[#1A253A] p-3">
+            <h2 className="title-4 text-pure-white">Filters</h2>
             <button
               type="button"
               onClick={clearFilters}
-              className="text-xs text-spark-lime hover:underline"
+              className="caption-3 text-spark-lime hover:underline"
             >
-              Reset All
+              Reset all
             </button>
           </div>
 
           {/* In-Stock Toggle */}
           <div>
-            <label className="flex cursor-pointer items-center gap-3 text-xs font-medium text-pure-white">
+            <label className="flex cursor-pointer items-center gap-3 title-4 text-pure-white">
               <input
                 type="checkbox"
                 checked={inStock}
                 onChange={(e) => updateParam('inStock', e.target.checked ? 'true' : null)}
-                className="h-4 w-4 rounded border-white/20 bg-onyx accent-spark-lime"
+                className="h-4 w-4 rounded border-[#28364F] bg-[#0B111E] accent-spark-lime"
               />
-              In-Stock Only
+              In stock only
             </label>
           </div>
 
           {/* Category Filter */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/50">
+          <div className="space-y-2">
+            <label
+              htmlFor="filter-category"
+              className="block caption-3 uppercase tracking-wider text-pure-white/60"
+            >
               Category
             </label>
             <select
+              id="filter-category"
               value={category}
               onChange={(e) => updateParam('category', e.target.value || null)}
-              className="input mt-1.5 text-xs"
+              className="input"
             >
-              <option value="">All Categories</option>
+              <option value="">All categories</option>
               {filtersData?.categories.map((c) => (
                 <option key={c.category} value={c.category}>
                   {c.category}
@@ -130,16 +147,20 @@ export function CatalogPage() {
           </div>
 
           {/* Manufacturer Filter */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/50">
+          <div className="space-y-2">
+            <label
+              htmlFor="filter-manufacturer"
+              className="block caption-3 uppercase tracking-wider text-pure-white/60"
+            >
               Manufacturer
             </label>
             <select
+              id="filter-manufacturer"
               value={manufacturer}
               onChange={(e) => updateParam('manufacturer', e.target.value || null)}
-              className="input mt-1.5 text-xs"
+              className="input"
             >
-              <option value="">All Manufacturers</option>
+              <option value="">All manufacturers</option>
               {filtersData?.manufacturers.map((m) => (
                 <option key={m} value={m}>
                   {m}
@@ -149,19 +170,23 @@ export function CatalogPage() {
           </div>
 
           {/* Sort Selection */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/50">
-              Sort By
+          <div className="space-y-2">
+            <label
+              htmlFor="filter-sort"
+              className="block caption-3 uppercase tracking-wider text-pure-white/60"
+            >
+              Sort order
             </label>
             <select
+              id="filter-sort"
               value={sort}
               onChange={(e) => updateParam('sort', e.target.value)}
-              className="input mt-1.5 text-xs"
+              className="input"
             >
-              <option value="newest">Newest Arrivals</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="name_asc">Alphabetical (A-Z)</option>
+              <option value="newest">Newest arrivals</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+              <option value="name_asc">Alphabetical (A to Z)</option>
             </select>
           </div>
         </aside>
@@ -171,7 +196,10 @@ export function CatalogPage() {
           {isLoading ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-80 animate-pulse rounded-xl border border-white/5 bg-onyx-surface" />
+                <div
+                  key={i}
+                  className="h-80 animate-pulse rounded-2xl border border-[#28364F] bg-[#131C2E]"
+                />
               ))}
             </div>
           ) : data && data.items.length > 0 ? (
@@ -188,17 +216,17 @@ export function CatalogPage() {
 
               {/* Pagination Bar */}
               {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-4">
+                <div className="mt-8 flex items-center justify-between rounded-2xl border border-[#28364F] bg-[#131C2E] p-4">
                   <button
                     type="button"
                     disabled={page <= 1}
                     onClick={() => updateParam('page', String(page - 1))}
-                    className="btn-ghost py-1.5 px-3 text-xs disabled:opacity-40"
+                    className="btn-ghost"
                   >
                     ← Previous
                   </button>
 
-                  <span className="font-mono text-xs text-pure-white/60">
+                  <span className="font-mono caption-2 text-pure-white/70">
                     Page {page} of {totalPages}
                   </span>
 
@@ -206,7 +234,7 @@ export function CatalogPage() {
                     type="button"
                     disabled={page >= totalPages}
                     onClick={() => updateParam('page', String(page + 1))}
-                    className="btn-ghost py-1.5 px-3 text-xs disabled:opacity-40"
+                    className="btn-ghost"
                   >
                     Next →
                   </button>
@@ -214,18 +242,20 @@ export function CatalogPage() {
               )}
             </>
           ) : (
-            <div className="rounded-xl border border-dashed border-white/10 bg-onyx-surface p-12 text-center">
-              <p className="text-base font-semibold text-pure-white">No components matched your filters.</p>
-              <p className="mt-1 text-xs text-pure-white/60">
-                Try clearing search terms or expanding manufacturer categories.
+            <div className="rounded-2xl border border-[#28364F] bg-[#131C2E] p-12 text-center space-y-3">
+              <p className="title-1 text-pure-white">No components matched your filters.</p>
+              <p className="body-6 text-pure-white/60">
+                Clear active search terms or broaden your manufacturer filter to view available silicon.
               </p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="btn-primary mt-4 py-1.5 text-xs font-semibold"
-              >
-                Reset Filters
-              </button>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="btn-primary"
+                >
+                  Reset filters
+                </button>
+              </div>
             </div>
           )}
         </div>

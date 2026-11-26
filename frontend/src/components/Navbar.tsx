@@ -4,125 +4,209 @@ import { useAuth } from '../auth/useAuth';
 import { useCart, useMe } from '../api/queries';
 import { AuthModal } from './AuthModal';
 
+/**
+ * Floating Navigation Bar (SKILL.md B7):
+ * - Resting state: compact bar that floats off the top edge, centered and sized to its content,
+ *   translucent surface over background blur.
+ * - Menu toggle: open/close icon transforms between its two states on cubic-bezier(0.22,1,0.36,1).
+ * - Mobile menu: opens as a full-height panel with staggered link entrance (60ms steps, 24px rise).
+ */
 export function Navbar() {
   const { session, signOut, configured } = useAuth();
   const { data: me } = useMe();
   const { data: cart } = useCart();
   const [authOpen, setAuthOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const cartCount = cart?.itemCount ?? 0;
   const isAdmin = me?.role === 'ADMIN';
 
+  const navItems = [
+    { to: '/', label: 'Overview', end: true },
+    { to: '/catalog', label: 'Catalog', end: false },
+    ...(session ? [{ to: '/orders', label: 'Orders', end: false }] : []),
+    ...(isAdmin ? [{ to: '/admin', label: 'Admin', end: false }] : []),
+  ];
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-onyx/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-4 z-40 mx-auto flex w-full max-w-5xl justify-center px-4">
+        <div className="flex w-full items-center justify-between gap-4 rounded-2xl border border-[#28364F] bg-[#131C2E]/90 px-4 py-2 backdrop-blur-md">
           {/* Brand Logo */}
           <Link to="/" className="group flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-spark-lime font-mono text-lg font-black text-onyx shadow-sm transition-transform group-hover:scale-105">
-              ⚡
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-spark-lime font-mono text-sm font-semibold text-[#0B111E] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
+              SZ
             </span>
-            <span className="text-xl font-bold tracking-tight text-pure-white">
+            <span className="title-2 text-pure-white">
               Spark<span className="text-spark-lime">Z</span>
             </span>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="flex items-center gap-6">
-            <NavLink
-              to="/catalog"
-              className={({ isActive }) =>
-                `text-sm font-medium transition-colors hover:text-spark-lime ${
-                  isActive ? 'text-spark-lime' : 'text-pure-white/80'
-                }`
-              }
-            >
-              Catalog
-            </NavLink>
-
-            {session && (
+          {/* Desktop Navigation Links */}
+          <nav aria-label="Primary" className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => (
               <NavLink
-                to="/orders"
+                key={item.to}
+                to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors hover:text-spark-lime ${
+                  `title-4 transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-spark-lime ${
                     isActive ? 'text-spark-lime' : 'text-pure-white/80'
                   }`
                 }
               >
-                Orders
+                {item.label}
               </NavLink>
-            )}
-
-            {isAdmin && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  `rounded-md border border-spark-lime/40 px-2.5 py-1 text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-spark-lime hover:text-onyx ${
-                    isActive ? 'bg-spark-lime text-onyx' : 'text-spark-lime'
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
-            )}
+            ))}
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Cart Link */}
-            <Link
+            <NavLink
               to="/cart"
-              className="relative flex items-center gap-2 rounded-lg border border-white/10 bg-onyx-surface px-3 py-2 text-sm font-medium text-pure-white transition-colors hover:border-spark-lime/60 hover:text-spark-lime"
-              aria-label="View Shopping Cart"
+              aria-label="View shopping cart"
+              className={({ isActive }) =>
+                `inline-flex items-center gap-2 rounded-lg border px-3 py-2 button-sm transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] ${
+                  isActive
+                    ? 'border-spark-lime bg-[#1A253A] text-spark-lime'
+                    : 'border-[#28364F] bg-[#1A253A] text-pure-white hover:border-spark-lime hover:text-spark-lime'
+                }`
+              }
             >
+              {/* Phosphor Bag Icon */}
               <svg
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                viewBox="0 0 256 256"
+                className="h-4 w-4 fill-current"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
+                <path d="M216,64H176a48,48,0,0,0-96,0H40A16,16,0,0,0,24,80V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64ZM128,32a32,32,0,0,1,32,32H96A32,32,0,0,1,128,32Zm88,168H40V80H80v16a8,8,0,0,0,16,0V80h64v16a8,8,0,0,0,16,0V80h40Z" />
               </svg>
               <span className="hidden sm:inline">Cart</span>
               {cartCount > 0 && (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-spark-lime px-1.5 text-xs font-bold text-onyx">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-spark-lime px-1 font-mono caption-3 text-[#0B111E]">
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </NavLink>
 
             {/* Auth Button */}
             {session ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden text-xs text-pure-white/60 md:inline">
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="caption-2 text-pure-white/70 max-w-36 truncate">
                   {me?.fullName || session.user.email}
                 </span>
                 <button
                   type="button"
                   onClick={() => signOut()}
-                  className="rounded-lg border border-white/10 bg-onyx-surface px-3 py-2 text-xs font-medium text-pure-white/80 transition-colors hover:border-white/30 hover:text-pure-white"
+                  className="btn-ghost"
                 >
-                  Sign Out
+                  Sign out
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => setAuthOpen(true)}
-                className="btn-primary py-1.5 text-sm"
+                className="btn-sm-primary"
               >
-                Sign In
+                Sign in
               </button>
             )}
+
+            {/* Mobile Menu Toggle (SKILL.md B7 transforming lines) */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen((prev) => !prev)}
+              aria-expanded={mobileOpen}
+              aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              className="inline-flex md:hidden h-9 w-9 items-center justify-center rounded-lg border border-[#28364F] bg-[#1A253A] text-pure-white transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-spark-lime"
+            >
+              <span className="relative flex h-4 w-4 flex-col justify-between">
+                <span
+                  className={`block h-0.5 w-4 bg-current transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    mobileOpen ? 'translate-y-[7px] rotate-45' : ''
+                  }`}
+                />
+                <span
+                  className={`block h-0.5 w-4 bg-current transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    mobileOpen ? 'opacity-0' : 'opacity-100'
+                  }`}
+                />
+                <span
+                  className={`block h-0.5 w-4 bg-current transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    mobileOpen ? '-translate-y-[7px] -rotate-45' : ''
+                  }`}
+                />
+              </span>
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Full-Height Mobile Menu Panel (SKILL.md B7) */}
+      <div
+        aria-hidden={!mobileOpen}
+        className={`fixed inset-0 z-30 md:hidden bg-[#0B111E]/95 backdrop-blur-xl transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <nav
+          aria-label="Mobile navigation"
+          className="flex h-full flex-col justify-between px-6 pt-24 pb-12"
+        >
+          <div className="flex flex-col gap-6">
+            {navItems.map((item, idx) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={() => setMobileOpen(false)}
+                style={{ transitionDelay: mobileOpen ? `${Math.min(idx * 60, 400)}ms` : '0ms' }}
+                className={({ isActive }) =>
+                  `heading-4 transition-[transform,opacity,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    mobileOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+                  } ${isActive ? 'text-spark-lime' : 'text-pure-white'}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-2xl border border-[#28364F] bg-[#131C2E] p-4">
+            {session ? (
+              <>
+                <p className="caption-1 text-pure-white/70">
+                  Signed in as {me?.fullName || session.user.email}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    signOut();
+                    setMobileOpen(false);
+                  }}
+                  className="btn-ghost w-full"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setAuthOpen(true);
+                }}
+                className="btn-primary w-full"
+              >
+                Sign in to SparkZ
+              </button>
+            )}
+          </div>
+        </nav>
+      </div>
 
       {authOpen && (
         <AuthModal

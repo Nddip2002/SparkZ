@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -8,6 +9,9 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.enableShutdownHooks();
+
+  // Security headers per SECURITY.md (#5)
+  app.use(helmet());
 
   const origins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
     .split(',')

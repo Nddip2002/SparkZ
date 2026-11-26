@@ -1,31 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  /* 60% — Onyx Black */
-  --color-onyx: #0b0b0d;
-  --color-onyx-surface: #141418;
-  /* 30% — Pure White */
-  --color-pure-white: #ffffff;
-  --color-off-white: #f4f4f6;
-  /* 10% — Spark Lime */
-  --color-spark-lime: #a3e635;
-  --color-spark-lime-hover: #bef264;
+  /* Eye-Friendly Deep Slate Navy & Soft Cyan Palette */
+  --color-onyx: #0b111e;
+  --color-onyx-surface: #131c2e;
+  --color-surface-elevated: #1a253a;
+  --color-surface-card: #22304a;
+  --color-surface-border: #28364f;
+  --color-surface-warm: #0f2537;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Softened Alabaster White & Slate Off-White (eliminates halation eye strain) */
+  --color-pure-white: #f1f5f9;
+  --color-off-white: #e2e8f0;
+
+  /* Soothing Electric Sky Cyan Accent (replaces harsh neon acid lime) */
+  --color-spark-lime: #38bdf8;
+  --color-spark-lime-hover: #7dd3fc;
+
+  /* Typography (Geist + Geist Mono) */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* Motion */
+  --ease-weighted: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
   html {
     color-scheme: dark;
+    font-family: var(--font-sans);
+    background-color: #0b111e;
+    color: #f1f5f9;
   }
 
   body {
-    @apply bg-onyx text-pure-white font-sans antialiased min-h-dvh;
+    @apply bg-[#0B111E] text-pure-white font-sans antialiased min-h-dvh overflow-x-hidden;
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+    font-style: normal;
   }
 
   ::selection {
-    @apply bg-spark-lime text-onyx;
+    @apply bg-spark-lime text-[#0B111E];
   }
 
   :focus-visible {
@@ -33,18 +57,142 @@
   }
 }
 
+/* ==========================================================================
+   Named Text Styles
+   ========================================================================== */
 @layer components {
+  .heading-1 {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+  .heading-2 {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+  .heading-3 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+  .heading-4 {
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+  .heading-5 {
+    @apply text-xl sm:text-2xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+  .heading-6 {
+    @apply text-xl font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+
+  .title-1 {
+    @apply text-xl font-medium;
+  }
+  .title-2 {
+    @apply text-lg font-medium;
+  }
+  .title-3 {
+    @apply text-base font-medium;
+  }
+  .title-4 {
+    @apply text-sm font-medium;
+  }
+  .title-5 {
+    @apply text-xs font-medium;
+  }
+
+  .body-1 {
+    @apply text-base font-semibold;
+    text-wrap: pretty;
+  }
+  .body-2 {
+    @apply text-base font-medium;
+    text-wrap: pretty;
+  }
+  .body-3 {
+    @apply text-base font-normal;
+    text-wrap: pretty;
+  }
+  .body-4 {
+    @apply text-sm font-semibold;
+    text-wrap: pretty;
+  }
+  .body-5 {
+    @apply text-sm font-medium;
+    text-wrap: pretty;
+  }
+  .body-6 {
+    @apply text-sm font-normal;
+    text-wrap: pretty;
+  }
+
+  .button-lg {
+    @apply text-lg font-semibold;
+  }
+  .button-md {
+    @apply text-base font-semibold;
+  }
+  .button-sm {
+    @apply text-sm font-semibold;
+  }
+  .button-xsm {
+    @apply text-xs font-semibold;
+  }
+
+  .caption-1 {
+    @apply text-sm font-medium;
+  }
+  .caption-2 {
+    @apply text-sm font-normal;
+  }
+  .caption-3 {
+    @apply text-xs font-semibold;
+  }
+  .caption-4 {
+    @apply text-xs font-medium;
+  }
+  .caption-5 {
+    @apply text-xs font-normal;
+  }
+
+  /* Hero Heading Color: Soft Alabaster #F8FAFC -> Cool Slate #94A3B8 */
+  .hero-heading-gradient {
+    background-image: linear-gradient(90deg, #f8fafc 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Main Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-spark-lime px-5 py-2.5 font-semibold text-onyx transition-colors hover:bg-spark-lime-hover disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-spark-lime px-3 py-2 text-[#0B111E] text-base font-semibold transition-[transform,background-color,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-spark-lime-hover hover:-translate-y-0.5 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-sm-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-spark-lime px-3 py-2 text-[#0B111E] text-sm font-semibold transition-[transform,background-color,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-spark-lime-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-5 py-2.5 font-medium text-pure-white transition-colors hover:border-spark-lime hover:text-spark-lime;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#28364F] bg-[#131C2E] px-3 py-2 text-pure-white text-sm font-semibold transition-[transform,border-color,color,background-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-spark-lime hover:text-spark-lime active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .input {
-    @apply w-full rounded-lg border border-white/10 bg-onyx-surface px-3 py-2 text-pure-white placeholder:text-white/40 focus:border-spark-lime focus:outline-none;
+    @apply w-full rounded-lg border border-[#28364F] bg-[#131C2E] px-3 py-2 text-sm font-normal text-pure-white placeholder:text-pure-white/40 transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus:border-spark-lime focus:outline-none;
   }
+}
+
+/* Accessibility: Skip Link Utility */
+.skip-link:where(:not(:focus, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
 }
 
 /* Hide native cursor only when the custom cursor is active (fine pointer + motion allowed). */
@@ -52,15 +200,5 @@
   html.has-custom-cursor,
   html.has-custom-cursor * {
     cursor: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

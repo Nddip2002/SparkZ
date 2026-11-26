@@ -25,22 +25,25 @@ export default function CheckoutPage() {
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-pure-white">Checkout</h1>
-        <p className="mt-2 text-xs text-pure-white/60">
-          Please sign in to proceed with your component order.
+      <div className="mx-auto max-w-[680px] py-16 text-center space-y-4">
+        <h1 className="heading-3 text-pure-white">Checkout</h1>
+        <p className="body-6 text-pure-white/60">
+          Sign in to verify your cart inventory and place an order.
         </p>
-        <Link to="/catalog" className="btn-primary mt-6 text-xs font-semibold">
-          Return to Catalog
-        </Link>
+        <div className="pt-2">
+          <Link to="/catalog" className="btn-primary">
+            Return to catalog
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl py-12 text-center text-pure-white/60">
-        Loading checkout details...
+      <div className="mx-auto max-w-4xl py-12 space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-[#131C2E]" />
+        <div className="h-64 animate-pulse rounded-2xl border border-[#28364F] bg-[#131C2E]" />
       </div>
     );
   }
@@ -48,14 +51,16 @@ export default function CheckoutPage() {
   const items = cart?.items ?? [];
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-md py-16 text-center">
-        <h1 className="text-2xl font-bold text-pure-white">Your Cart is Empty</h1>
-        <p className="mt-2 text-xs text-pure-white/60">
-          There are no components in your cart to checkout.
+      <div className="mx-auto max-w-[680px] py-16 text-center space-y-4">
+        <h1 className="heading-3 text-pure-white">Your cart is empty</h1>
+        <p className="body-6 text-pure-white/60">
+          Add components from the catalog before proceeding to checkout.
         </p>
-        <Link to="/catalog" className="btn-primary mt-6 text-xs font-semibold">
-          Browse Products
-        </Link>
+        <div className="pt-2">
+          <Link to="/catalog" className="btn-primary">
+            Browse live catalog
+          </Link>
+        </div>
       </div>
     );
   }
@@ -72,126 +77,148 @@ export default function CheckoutPage() {
       const order = await checkout.mutateAsync(address);
       navigate(`/orders?success=${order.orderNumber}`);
     } catch (err) {
-      setError((err as Error).message || 'Failed to complete checkout');
+      setError((err as Error).message || 'Checkout failed. Please review your shipping details and try again.');
     }
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-16">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-pure-white">Secure Checkout</h1>
-        <p className="mt-1 text-xs text-pure-white/60">
-          Atomic inventory verification and immediate order generation.
+    <div className="mx-auto max-w-5xl space-y-8 pb-20 pt-6">
+      <div className="space-y-1">
+        <Link to="/cart" className="caption-4 text-spark-lime hover:underline">
+          ← Back to shopping cart
+        </Link>
+        <h1 className="heading-3 text-pure-white">Secure checkout</h1>
+        <p className="caption-2 text-pure-white/60">
+          Atomic inventory verification and immediate order number assignment.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-xs text-red-400">
-          <strong>Order Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-500/40 bg-[#131C2E] p-4 body-5 text-red-400"
+        >
+          {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Shipping Address Inputs */}
-        <div className="space-y-6 rounded-xl border border-white/10 bg-onyx-surface p-6 lg:col-span-2">
-          <h2 className="text-base font-bold text-pure-white">Shipping Destination</h2>
+        <div className="space-y-6 rounded-2xl border border-[#28364F] bg-[#131C2E] p-6 lg:col-span-2">
+          <h2 className="title-1 text-pure-white">Shipping destination</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                Full Name *
+            <div className="space-y-1">
+              <label htmlFor="ship-name" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                Full name
               </label>
               <input
+                id="ship-name"
                 type="text"
                 required
+                autoComplete="name"
                 value={address.fullName}
                 onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
-                className="input mt-1 text-xs"
+                className="input"
                 placeholder="Nikola Tesla"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                Phone Number *
+            <div className="space-y-1">
+              <label htmlFor="ship-phone" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                Phone number
               </label>
               <input
+                id="ship-phone"
                 type="tel"
                 required
+                autoComplete="tel"
+                pattern="^\+?[0-9\s-]{7,20}$"
                 value={address.phone}
                 onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                className="input mt-1 text-xs"
+                className="input"
                 placeholder="+91 9876543210"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-              Address Line 1 *
+          <div className="space-y-1">
+            <label htmlFor="ship-line1" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+              Address line 1
             </label>
             <input
+              id="ship-line1"
               type="text"
               required
+              autoComplete="address-line1"
               value={address.line1}
               onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-              className="input mt-1 text-xs"
+              className="input"
               placeholder="Plot 42, Tech Park, Industrial Area"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-              Address Line 2 (Optional)
+          <div className="space-y-1">
+            <label htmlFor="ship-line2" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+              Address line 2 (optional)
             </label>
             <input
+              id="ship-line2"
               type="text"
+              autoComplete="address-line2"
               value={address.line2}
               onChange={(e) => setAddress({ ...address, line2: e.target.value })}
-              className="input mt-1 text-xs"
+              className="input"
               placeholder="Lab 3B, Building 5"
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                City *
+            <div className="space-y-1">
+              <label htmlFor="ship-city" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                City
               </label>
               <input
+                id="ship-city"
                 type="text"
                 required
+                autoComplete="address-level2"
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className="input mt-1 text-xs"
+                className="input"
                 placeholder="Bengaluru"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                State *
+            <div className="space-y-1">
+              <label htmlFor="ship-state" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                State
               </label>
               <input
+                id="ship-state"
                 type="text"
                 required
+                autoComplete="address-level1"
                 value={address.state}
                 onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                className="input mt-1 text-xs"
+                className="input"
                 placeholder="Karnataka"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-pure-white/60">
-                PIN / Postal Code *
+            <div className="space-y-1">
+              <label htmlFor="ship-postal" className="block caption-3 uppercase tracking-wider text-pure-white/60">
+                Postal code
               </label>
               <input
+                id="ship-postal"
                 type="text"
                 required
+                autoComplete="postal-code"
+                pattern="^[A-Za-z0-9\s-]{3,12}$"
                 value={address.postalCode}
                 onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
-                className="input mt-1 text-xs"
+                className="input"
                 placeholder="560100"
               />
             </div>
@@ -199,38 +226,38 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order Review & Pay CTA */}
-        <div className="h-fit space-y-6 rounded-xl border border-white/10 bg-onyx-surface p-6">
-          <h2 className="text-base font-bold text-pure-white">Order Summary</h2>
+        <div className="h-fit space-y-6 rounded-2xl border border-[#28364F] bg-[#131C2E] p-6">
+          <h2 className="title-1 text-pure-white">Order review</h2>
 
-          <div className="max-h-60 space-y-3 overflow-y-auto border-b border-white/10 pb-4 pr-1 text-xs">
+          <div className="max-h-60 space-y-3 overflow-y-auto rounded-lg border border-[#28364F] bg-[#1A253A] p-4">
             {items.map((i) => (
-              <div key={i.id} className="flex justify-between items-center text-pure-white/80">
-                <span className="truncate max-w-[180px]">
+              <div key={i.id} className="flex justify-between items-center gap-2 caption-2 text-pure-white/80">
+                <span className="truncate">
                   {i.quantity}x {i.product.name}
                 </span>
-                <span className="font-mono">
+                <span className="font-mono text-pure-white">
                   {formatPrice(Number(i.product.unitPrice) * i.quantity)}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="space-y-2 border-b border-white/10 pb-4 text-xs">
-            <div className="flex justify-between text-pure-white/70">
+          <div className="space-y-2 rounded-lg border border-[#28364F] bg-[#1A253A] p-4">
+            <div className="flex justify-between caption-2 text-pure-white/70">
               <span>Subtotal</span>
               <span className="font-mono text-pure-white">{formatPrice(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-pure-white/70">
+            <div className="flex justify-between caption-2 text-pure-white/70">
               <span>Shipping</span>
               <span className="font-mono text-pure-white">
-                {shippingCost === 0 ? <span className="text-spark-lime font-bold">FREE</span> : formatPrice(shippingCost)}
+                {shippingCost === 0 ? <span className="text-spark-lime">FREE</span> : formatPrice(shippingCost)}
               </span>
             </div>
           </div>
 
           <div className="flex items-baseline justify-between pt-1">
-            <span className="text-sm font-semibold text-pure-white">Total Amount</span>
-            <span className="text-xl font-black text-spark-lime font-mono">
+            <span className="title-3 text-pure-white">Total amount</span>
+            <span className="font-mono heading-5 text-spark-lime">
               {formatPrice(totalAmount)}
             </span>
           </div>
@@ -238,13 +265,13 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={checkout.isPending}
-            className="btn-primary w-full py-3 text-sm font-bold shadow-md shadow-spark-lime/10"
+            className="btn-primary w-full"
           >
-            {checkout.isPending ? 'Validating & Placing Order...' : 'Place SparkZ Order →'}
+            {checkout.isPending ? 'Locking inventory and placing order...' : 'Place SparkZ order'}
           </button>
 
-          <p className="text-[10px] text-pure-white/40 text-center">
-            Guaranteed atomic stock decrement. Order prefix generated as SZ-YYYY-XXXX.
+          <p className="caption-5 text-pure-white/50 text-center">
+            Atomic stock decrement inside PostgreSQL transaction.
           </p>
         </div>
       </form>

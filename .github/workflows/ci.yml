@@ -1,0 +1,54 @@
+name: SparkZ CI & Security Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, Typecheck, Build & Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Verify no .env or secret keys tracked in git
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$'; then
+            echo "Error: A .env file is tracked in git!"
+            exit 1
+          fi
+
+      - name: Frontend — Install, Lint & Build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+          npm audit --omit=dev --audit-level=high
+
+      - name: Backend — Install, Generate Prisma Client, Lint & Build
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sparkz
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/sparkz
+        run: |
+          npm ci
+          npx prisma generate
+          npm run lint
+          npm run build
